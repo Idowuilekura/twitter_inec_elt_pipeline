@@ -1,0 +1,42 @@
+version: 2
+sources:
+  - name: raw
+    database: idowupluralproj
+    schema: idowu_dataset_tweepy
+    tables:
+      - name: twitter_inec_table_tweepy
+
+models: 
+  - name: raw_tweepy_twitter_data
+    description: raw information of tweets that were sent on twitter that contains inec
+
+    columns: 
+      - name: datetime 
+        description: >
+          The date and time that the tweet was made
+        tests: 
+          - not_null:
+              severity: warn 
+      - name: twitter_text
+        description: the content of the tweet from a user
+        tests:
+          - not_null:
+              severity: warn 
+      - name: username
+        description: the username of the entity that made the tweet 
+      - name: number_of_followers
+        description: the number of entities following a user that made the tweet
+      - name: number_of_followers
+        description: the number of entities the user that made the tweet is following
+      - name: number_of_retweet_count
+        description: the number of retweet that a tweet got
+      - name: number_of_tweet_like
+        description: the number of likes that a tweet got
+      - name: number_of_replies
+        description: the number of replies that a tweet got
+      - name: tweet_sentiment
+        description: the sentiment value of the tweet
+
+
+      
+            
