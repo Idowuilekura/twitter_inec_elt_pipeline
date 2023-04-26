@@ -1,0 +1,5 @@
+
+target/
+dbt_packages/
+logs/
+twitter_analysis_tweepy/idowupluralproj-4f77d4e84610.json
