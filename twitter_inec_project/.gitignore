@@ -5,4 +5,4 @@ dtb_idowu_project
 test_twitter.json
 .env
 venv/
-service_account.json
+*service_account.json
