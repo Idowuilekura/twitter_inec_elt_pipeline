@@ -3,11 +3,17 @@ import pyspark
 import pandas as pd
 from pyspark.sql import types, SparkSession, functions as F
 from google.cloud import bigquery
-from download_twitter_data_tweepy import tweets_df
+# from download_twitter_data_tweepy import tweets_df
 import os
 os.system("pip install textblob")
 os.system("pip install -U regex")
 from textblob import TextBlob
+import datetime as dt
+from dotenv import load_dotenv
+
+load_dotenv()
+# until_date_formatted = dt.datetime.now().date().strftime("%Y-%m-%d")
+date_yesterday = (dt.datetime.now().date()- dt.timedelta(1)).strftime("%Y-%m-%d")
 
 def remove_url(tweet):
     # text = re.sub(r'^https?:\/\/.*[\r\n]*', '', text, flags=re.MULTILINE)
@@ -86,9 +92,9 @@ schema_twitter = types.StructType([
 # # tweet_spark_df = spark_session.createDataFrame(tweets_df, schema=schema_twitter)
 
 # print(tweet_spark_df.schema)
-project_name = 'idowupluralproj'
-dataset_name = 'idowu_dataset_tweepy'
-table_name = 'twitter_inec_table_tweepy'
+project_name = os.getenv("PROJECT_NAME")
+dataset_name = os.getenv("DATASET_NAME")
+table_name = os.getenv("TABLE_NAME")
 dataset_id = project_name+'.'+dataset_name
 bigquery_table_id = project_name+'.'+dataset_name+'.'+table_name
 bigquery_table_id_without_project = dataset_name+'.'+table_name
@@ -98,24 +104,25 @@ dataset = client.dataset(dataset_name)
 table_ref = dataset.table(table_name)
 
 
+dataset_location = os.getenv("DATASET_LOCATION")
 
-
-def create_dataset_if_not_exist(client, dataset_id):
+def create_dataset_if_not_exist(client:str, dataset_id:str,dataset_location:str):
    
     try:
         dataset = bigquery.Dataset(dataset_id)
-        dataset.location = 'europe-west4'
+        dataset.location = dataset_location
         client.create_dataset(dataset, timeout=30)
     except:
         pass
 
-create_dataset_if_not_exist(client,dataset_id)
+create_dataset_if_not_exist(client,dataset_id,dataset_location=dataset_location)
 
-def create_spark_session_df(tweets_df:pd.DataFrame = tweets_df):
+def create_spark_session_and_spark_df(df_path:str):
 
     spark_session = SparkSession.builder.appName('spark_sql').getOrCreate()
 
-    tweet_spark_df = spark_session.createDataFrame(tweets_df, schema=schema_twitter)
+    # tweet_spark_df = spark_session.createDataFrame(tweets_df, schema=schema_twitter)
+    tweet_spark_df = spark_session.read.parquet(df_path)
 
     tweet_spark_df = tweet_spark_df.withColumn('twitter_text', remove_url_udf('twitter_text')) \
             .withColumn('twitter_text', demojify_udf('twitter_text')).withColumn('tweet_sentiment', get_sentiment_data_udf('twitter_text')) 
@@ -129,10 +136,11 @@ def create_spark_session_df(tweets_df:pd.DataFrame = tweets_df):
 
     return spark_session, tweet_spark_df
 
-spark_session, tweet_spark_df = create_spark_session_df(tweets_df=tweets_df)
+GCP_BUCKET_NAME = os.getenv("GCP_BUCKET_NAME")
+spark_session, tweet_spark_df = create_spark_session_and_spark_df(df_path=GCP_BUCKET_NAME + '/' + f'twitter_data/data_{date_yesterday}.parquet.gzip')
 print(tweet_spark_df.show())
 
-bucket = "dataproc-staging-europe-west4-649199410619-8fpffanv"
+bucket = os.getenv("DATAPROC_STAGING_BUCKET")
 spark_session.conf.set('temporaryGcsBucket', bucket)
 
 def check_if_table_exist_and_create(client, table_ref,bigquery_table_id_without_project,tweet_spark_df):

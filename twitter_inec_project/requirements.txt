@@ -1,0 +1,8 @@
+prefect
+pandas
+tweepy
+gcloud
+dbt-core
+dbt-bigquery
+python-dotenv
+

@@ -15,8 +15,8 @@ influencer_index_average AS (SELECT username, AVG(influencer_index) average_infl
         FROM influencer_calculation
         GROUP BY username),
 
-    influencer_name AS (SELECT username, CASE WHEN average_influencer_index < 1 THEN 'True'
-    ELSE 'False' END AS user_is_influencer
+    influencer_name AS (SELECT username, CASE WHEN average_influencer_index < 1 THEN 'Influencer'
+    ELSE 'Non-influencer' END AS user_is_influencer
     FROM influencer_index_average), distinct_datetime AS (
         SELECT DISTINCT(datetime) time_tweet_was_made
         FROM raw_tweets
@@ -28,7 +28,8 @@ influencer_index_average AS (SELECT username, AVG(influencer_index) average_infl
         FROM distinct_datetime
     )
 
-SELECT rt.datetime date_of_tweet, rt.twitter_text, rt.username, rt.user_is_verified,rt.number_of_retweet_count,
+SELECT rt.datetime date_of_tweet, rt.twitter_text, rt.username, CASE WHEN rt.user_is_verified = TRUE THEN 'Verified' 
+ELSE 'Not-Verified' END AS user_is_verified,rt.number_of_retweet_count,
     rt.number_of_tweet_like,iia.user_is_influencer user_is_influencer,
 CASE WHEN CAST(rt.tweet_sentiment AS INTEGER) = 1 THEN 'Positive'
     WHEN CAST(rt.tweet_sentiment AS INTEGER) = 0 THEN 'Neutral'
@@ -40,7 +41,3 @@ CASE WHEN CAST(rt.tweet_sentiment AS INTEGER) = 1 THEN 'Positive'
     INNER JOIN 
     date_before_or_after_president_election dboape 
     ON rt.datetime = dboape.time_tweet_was_made
-
--- SELECT * FROM raw_tweets
--- LIMIT 30
-

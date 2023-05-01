@@ -5,7 +5,7 @@ twitter_analysis_tweepy:
       dataset: idowu_dataset_tweepy
       job_execution_timeout_seconds: 600
       job_retries: 1
-      keyfile: ./idowupluralproj-4f77d4e84610.json
+      keyfile: ./service_account.json
       location: europe-west4
       method: service-account
       priority: interactive
@@ -17,7 +17,7 @@ twitter_analysis_tweepy:
       dataset: production_tweepy
       job_execution_timeout_seconds: 600
       job_retries: 1
-      keyfile: ./idowupluralproj-4f77d4e84610.json
+      keyfile: ./service_account.json
       location: europe-west4
       method: service-account
       priority: interactive

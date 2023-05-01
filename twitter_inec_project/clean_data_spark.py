@@ -3,11 +3,14 @@ import pyspark
 import pandas as pd
 from pyspark.sql import types, SparkSession, functions as F
 from google.cloud import bigquery
-from download_twitter_data import tweets_df
+# from download_twitter_data import tweets_df
 import os
 os.system("pip install textblob")
 os.system("pip install -U regex")
 from textblob import TextBlob
+import datetime as dt
+date_yesterday = (dt.datetime.now().date()- dt.timedelta(3)).strftime("%Y-%m-%d")
+# until_date_formatted = dt.datetime.now().date().strftime("%Y-%m-%d")
 
 def remove_url(tweet):
     # text = re.sub(r'^https?:\/\/.*[\r\n]*', '', text, flags=re.MULTILINE)
@@ -112,11 +115,11 @@ def create_dataset_if_not_exist(client, dataset_id):
 
 create_dataset_if_not_exist(client,dataset_id)
 
-def create_spark_session_df(tweets_df:pd.DataFrame = tweets_df):
+def create_spark_session_df(tweets_df_url : str):
 
     spark_session = SparkSession.builder.appName('spark_sql').getOrCreate()
 
-    tweet_spark_df = spark_session.createDataFrame(tweets_df, schema=schema_twitter)
+    tweet_spark_df = spark_session.read.parquet(tweets_df_url)
 
     tweet_spark_df = tweet_spark_df.withColumn('twitter_text', remove_url_udf('twitter_text')) \
             .withColumn('twitter_text', demojify_udf('twitter_text')).withColumn('tweet_sentiment', get_sentiment_data_udf('twitter_text')) \
@@ -129,7 +132,7 @@ def create_spark_session_df(tweets_df:pd.DataFrame = tweets_df):
 
     return spark_session, tweet_spark_df
 
-spark_session, tweet_spark_df = create_spark_session_df(tweets_df=tweets_df)
+spark_session, tweet_spark_df = create_spark_session_df(tweets_df_url=f'gs://dtc_data_lake_idowupluralproj/twitter_data/data_{date_yesterday}.parquet.gzip')
 
 bucket = "dataproc-staging-europe-west4-649199410619-8fpffanv"
 spark_session.conf.set('temporaryGcsBucket', bucket)
