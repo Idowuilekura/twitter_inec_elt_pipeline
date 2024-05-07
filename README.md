@@ -9,12 +9,14 @@ The analysis can help inform the Government about the perception of her citizen 
 ![image](https://user-images.githubusercontent.com/38056084/234894304-b945ea2f-7042-4864-98aa-4e5c9ab01006.png)
 
 ### Architectural Diagram Explanation
-Tweets that contains INEC or inec are scrapped from twitter, the data is then loaded into a pandas dataframe. The data will be stored as a parquet file on google cloud storage, Apache Spark(on Google DataProc) is used to load and perform little transformation such as removal of url, hashtags, emojis. Once the transformation is done, the data will be moved into a Google Bigquery table. DBT is used for performing heavy transformation and analaysis, the transformed data is written back to bigquery. 
+Tweets containing "INEC" or "inec" were scraped from Twitter, and the data was then loaded into a pandas dataframe. To optimize storage and query performance, the data was stored as a Parquet file on Google Cloud Storage. Parquet, known for its columnar storage format and efficient compression algorithms, was chosen to minimize storage costs and maximize query speed.
 
-Google LookerStudio is used for performing the analysis and visualiziation. The steps from ingesting the data uptil DBT is orchestratred by Prefect at 12 am daily and run on Google Cloud Platform. The data refresh rate on looker studio is 12 hours. 
+Apache Spark (on Google DataProc) was used to load and perform minor transformations such as removal of URLs, hashtags, and emojis. Once the transformations were completed, the data was moved into a Google BigQuery table. DBT was used for heavy transformation and analysis, and the transformed data was written back to BigQuery.
+
+Google LookerStudio was used for analysis and visualization. The steps from ingesting the data up to DBT were orchestrated by Prefect at 12 am daily and ran on Google Cloud Platform. The data refresh rate on Looker Studio was 12 hours.
 
 ### Data Visualization Motivation
-Given that the aim of the project was to get the perception of twitter users about INEC and also see how the perception grows over time. My final visualization was composed of the information below, 
+Given that the project aimed to get the perception of twitter users about INEC and also see how the perception grows over time. My final visualization was composed of the information below, 
 
 - date that the tweet was made
 - tweet content 
