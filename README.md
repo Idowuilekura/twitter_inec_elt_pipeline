@@ -110,5 +110,7 @@ LIMIT
 - Once you are done, you will see a visual similar to what is shown below
 ![image](https://user-images.githubusercontent.com/38056084/235382225-cf02823e-51f7-472a-a618-bedd71237069.png)
 
-
+## Next step
+- Containerize the workflow and run on Kubernetes
+- Implement a CI/CD framework for testing and continuously deploying the code
 
